@@ -10,7 +10,8 @@ MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Set your path of packages.
 # If cmake cannot find opencv or eigen3, try to set the path manually as following.
-set(Torch_DIR "/home/deng/SP_SLAM/Thirdparty/libtorch/share/cmake/Torch")  # libtorch
+#set(Torch_DIR "/home/deng/SP_SLAM/Thirdparty/libtorch/share/cmake/Torch")  # libtorch
+set(Torch_DIR "/home/cc/MyWorkPlace/libtorch/share/cmake/Torch")  # libtorch
 # set(OpenCV_DIR "/usr/share/OpenCV")   # opencv
 # set(Eigen3_DIR "/usr/lib/cmake/eigen3")    # eigen3
 
@@ -21,14 +22,14 @@ set(Torch_DIR "/home/deng/SP_SLAM/Thirdparty/libtorch/share/cmake/Torch")  # lib
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=native ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=native")
 
-# Check C++11 or C++0x support
+# Check C++14 or C++0x support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-   add_definitions(-DCOMPILEDWITHC11)
-   message(STATUS "Using flag -std=c++11.")
+if(COMPILER_SUPPORTS_CXX14)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+   add_definitions(-DCOMPILEDWITHC14)
+   message(STATUS "Using flag -std=c++14.")
 elseif(COMPILER_SUPPORTS_CXX0X)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
    add_definitions(-DCOMPILEDWITHC0X)
@@ -130,4 +131,9 @@ target_link_libraries(mono_kitti ${PROJECT_NAME})
 add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
+
+#生成调用摄像头可执行文件
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_executable(myslam myslam.cpp)
+target_link_libraries(myslam ${PROJECT_NAME})
 

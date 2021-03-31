@@ -1,6 +1,8 @@
 # SuperPoint-SLAM
 
-​	该仓库引用自https://github.com/KinglittleQ/SuperPoint_SLAM，比较了该算法与[ORB-SLAM2](https://github.com/raulmur/ORB_SLAM2)算法，在具体修改的地方添加了注释。
+​	该仓库引用自https://github.com/KinglittleQ/SuperPoint_SLAM，比较了该算法与[ORB-SLAM2](https://github.com/raulmur/ORB_SLAM2)
+
+算法，在具体修改的地方添加了注释。
 
 ​	使用`Pytorch C ++ API`来实现`SuperPoint`模型，该模型用于特征点和描述子提取，所以需要修改原有代码中提取`FAST`特征点以及计算`brief`描述子部分代码。
 
@@ -79,6 +81,10 @@
     ​	将汉明距离修改为`(float)cv::norm(a, b, cv::NORM_L2)`，即`L2`范数。同时将该文件中其他距离的数据类型从`int`改为`float`。
 
 - ### 修改上述文件相关的`.h`文件以及`CMakeLists.txt`文件。
+
+#### 使用自带摄像头方法
+
+​	`myslam.yaml`中存放自带摄像头参数，`myslam.cpp`中`cv::VideoCapture cap()`函数指定使用的摄像头设备号，成功编译后执行生成的`myslam`即可使用自带摄像头。
 
 # SuperPoint-SLAM
 
