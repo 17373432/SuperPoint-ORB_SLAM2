@@ -1,5 +1,87 @@
 # SuperPoint-SLAM
 
+​	该仓库引用自https://github.com/KinglittleQ/SuperPoint_SLAM，比较了该算法与[ORB-SLAM2](https://github.com/raulmur/ORB_SLAM2)算法，在具体修改的地方添加了注释。
+
+​	使用`Pytorch C ++ API`来实现`SuperPoint`模型，该模型用于特征点和描述子提取，所以需要修改原有代码中提取`FAST`特征点以及计算`brief`描述子部分代码。
+
+- ### 新建`include/SuperPoint.h`
+
+  - ####  `SuperPoint`结构体
+
+    ​	函数有构造函数、`forward()`函数。
+
+    ​	属性有模型使用的卷积层。
+
+  - #### `SPDetector`类
+
+    ​	函数有构造函数、`detect()`函数、`getKeyPoints()`函数、`computeDescriptors()`函数。
+
+    ​	属性有网络模型、网络输出的每个像素为特征点的概率大小以及描述信息。
+
+- ### 新建`src/SuperPoint.cc`
+
+  - #### `forward()`函数
+
+    ​	正向传播函数，网络结构如下，前四层为公共层，每层两次卷积一次池化，激活函数选用`ReLU`，公共层通过特征点检测层得到每个像素为特征点的概率大小，通过描述子检测层得到描述信息。
+
+  ```c++
+  x = torch::relu(conv1a->forward(x));
+  x = torch::relu(conv1b->forward(x));
+  x = torch::max_pool2d(x, 2, 2);
+  
+  x = torch::relu(conv2a->forward(x));
+  x = torch::relu(conv2b->forward(x));
+  x = torch::max_pool2d(x, 2, 2);
+  
+  x = torch::relu(conv3a->forward(x));
+  x = torch::relu(conv3b->forward(x));
+  x = torch::max_pool2d(x, 2, 2);
+  
+  x = torch::relu(conv4a->forward(x));
+  x = torch::relu(conv4b->forward(x));
+  
+  auto cPa = torch::relu(convPa->forward(x));
+  auto semi = convPb->forward(cPa);  // [B, 65, H/8, W/8]
+  
+  auto cDa = torch::relu(convDa->forward(x));
+  auto desc = convDb->forward(cDa);  // [B, d1, H/8, W/8] 
+  ```
+  - #### `detect()`函数
+
+    ​	先使用`torch::from_blob()`函数将输入图片转换为张量，并进行归一化。之后选择使用`GPU`还是`CPU`，并将模型加载到相应的设备上。将输入通过`forward()`函数得到两层输出，分别为各点为特征点的概率与描述信息。
+
+  - #### `getKeyPoints()`函数
+
+    ​	将各点为特征点的概率与设置的阈值比较，提取特征点，之后根据输入信息选择是否使用非极大值抑制。
+
+  - #### `computeDescriptors()`函数
+
+    ​	对输入的描述信息使用`torch::grid_sampler()`函数进行双线性插值得到完整描述子，之后使用`torch::norm()`函数进行`L2`标准化得到单位长度的描述。
+
+  - #### `SPdetect()`函数
+
+    ​	上述三个函数的结合。
+
+- ### 将`src/ORBextractor.cc`修改为`src/SPextractor.cc`
+
+  - #### 将`ORBextractor()`函数修改为`SPextractor()`函数
+
+    ​	添加`torch::load()`导入训练好的模型，并删除计算特征点方向部分代码（用于计算之后的`brief`描述子）。
+
+  - #### 修改`ComputeKeyPointsOctTree()`函数
+
+    ​	删去原先使用的提取`FAST`角点算法以及计算特征点方向信息部分代码，使用`src/SuperPoint.cc`中的`detect()`函数，得到各点为特征点的概率与描述信息，之后使用`getKeyPoints()`函数来提取特征点,并使用`computeDescriptors()`函数来计算描述信息。
+
+- ### 将`src/ORBmatcher.cc`修改为`src/SPmatcher.cc` 
+
+  - #### 修改`DescriptorDistance()`函数
+
+    ​	将汉明距离修改为`(float)cv::norm(a, b, cv::NORM_L2)`，即`L2`范数。同时将该文件中其他距离的数据类型从`int`改为`float`。
+
+- ### 修改上述文件相关的`.h`文件以及`CMakeLists.txt`文件。
+
+# SuperPoint-SLAM
+
 **UPDATE: Add citation**
 
 This repository was forked from ORB-SLAM2 https://github.com/raulmur/ORB_SLAM2.  SuperPoint-SLAM is a modified version of ORB-SLAM2 which use SuperPoint as its feature detector and descriptor. The pre-trained model of SuperPoint  come from https://github.com/MagicLeapResearch/SuperPointPretrainedNetwork.
