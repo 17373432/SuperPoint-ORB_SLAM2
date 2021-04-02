@@ -1,8 +1,6 @@
 # SuperPoint-SLAM
 
-​	该仓库引用自https://github.com/KinglittleQ/SuperPoint_SLAM，比较了该算法与[ORB-SLAM2](https://github.com/raulmur/ORB_SLAM2)
-
-算法，在具体修改的地方添加了注释。
+​	该仓库引用自https://github.com/KinglittleQ/SuperPoint_SLAM，比较了该算法与 [ORB-SLAM2](https://github.com/raulmur/ORB_SLAM2) 算法，在具体修改的地方添加了注释。
 
 ​	使用`Pytorch C ++ API`来实现`SuperPoint`模型，该模型用于特征点和描述子提取，所以需要修改原有代码中提取`FAST`特征点以及计算`brief`描述子部分代码。
 
